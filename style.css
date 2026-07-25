@@ -1,14 +1,13 @@
 :root {
-    /* New stylish Royal Sapphire & Deep Amethyst Gradient Background */
     --bg-gradient: linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #3a0ca3 100%);
     --panel-bg: rgba(255, 255, 255, 0.04);
     --panel-border: rgba(255, 255, 255, 0.1);
     --text-main: #f1f5f9;
     --text-muted: #94a3b8;
-    --accent: #4cc9f0; /* Neon Cyan Accent */
-    --accent-hover: #4361ee; /* Electric Blue Accent */
+    --accent: #4cc9f0;
+    --accent-hover: #4361ee;
     --correct: #10b981;
-    --incorrect: #f72585; /* Neon Pink/Red Error */
+    --incorrect: #f72585;
 }
 
 * {
@@ -18,69 +17,25 @@
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-
-/* Position the home button absolutely in the top left */
-.home-btn {
-    position: absolute;
-    top: 25px;
-    left: 25px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: #ffffff;
-    font-family: sans-serif; /* Match your app's font */
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-}
-
-/* Hover effects matching the neon UI theme */
-.home-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: #38bdf8; /* Soft blue glow */
-    color: #38bdf8;
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-    transform: translateY(-2px);
-}
-
-/* Active click state animation */
-.home-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 0 5px rgba(56, 189, 248, 0.2);
-}
-
-
 body {
     background: var(--bg-gradient);
     background-attachment: fixed;
     color: var(--text-main);
     min-height: 100vh;
-    padding: 2rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-	position: relative;
-	margin: 0;
+    position: relative;
 }
 
 header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 header h1 {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     font-weight: 700;
     letter-spacing: -0.05em;
     background: linear-gradient(to right, #4cc9f0, #f72585);
@@ -97,7 +52,7 @@ header p {
 .container {
     display: grid;
     grid-template-columns: 300px 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
     max-width: 1200px;
     width: 100%;
     align-items: start;
@@ -108,18 +63,19 @@ header p {
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
     border-radius: 16px;
-    padding: 1.5rem;
+    padding: 1.25rem;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     position: sticky;
-    top: 2rem;
+    top: 1.5rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    z-index: 10;
 }
 
 .panel-title {
     font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--panel-border);
     color: #4cc9f0;
@@ -127,35 +83,45 @@ header p {
 
 .help-box {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 0.75rem;
-    min-height: 200px;
+    min-height: 100px;
 }
 
 .draggable-item {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     padding: 0.75rem 1rem;
     border-radius: 8px;
     cursor: grab;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     user-select: none;
+    -webkit-user-select: none;
+    touch-action: none; /* Prevents touch browser defaults */
     font-weight: 500;
+    display: inline-block;
 }
 
 .draggable-item:hover {
     background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
     border-color: var(--accent);
     box-shadow: 0 5px 15px rgba(76, 201, 240, 0.2);
 }
 
-.draggable-item:active {
-    cursor: grabbing;
+.draggable-item.dragging {
+    opacity: 0.3;
 }
 
-.draggable-item.dragging {
-    opacity: 0.4;
+/* Mobile Touch Ghost Clone */
+.touch-ghost {
+    position: fixed !important;
+    pointer-events: none !important;
+    z-index: 9999 !important;
+    opacity: 0.9;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    background: rgba(76, 201, 240, 0.25);
+    border: 1px solid var(--accent);
+    transform: scale(1.05);
 }
 
 /* Questions Styles */
@@ -163,7 +129,7 @@ header p {
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
     border-radius: 16px;
-    padding: 1.5rem;
+    padding: 1.25rem;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
@@ -196,7 +162,7 @@ header p {
 
 .drop-zone {
     width: 220px;
-    height: 48px;
+    min-height: 48px;
     border: 2px dashed rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     display: flex;
@@ -209,8 +175,8 @@ header p {
 }
 
 .drop-zone--over {
-    border-color: var(--accent);
-    background: rgba(76, 201, 240, 0.1);
+    border-color: var(--accent) !important;
+    background: rgba(76, 201, 240, 0.15) !important;
 }
 
 .drop-zone .draggable-item {
@@ -218,6 +184,7 @@ header p {
     height: 100%;
     display: flex;
     align-items: center;
+    justify-content: center;
     margin: 0;
     box-sizing: border-box;
     background: rgba(76, 201, 240, 0.1);
@@ -261,6 +228,7 @@ header p {
     padding: 0.85rem 2.5rem;
     border-radius: 8px;
     display: none;
+    text-align: center;
     animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
@@ -289,18 +257,26 @@ header p {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive Overrides */
+/* Mobile Layout Overrides */
 @media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
     .container {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
     .help-box-panel {
         position: relative;
         top: 0;
     }
+    .help-box {
+        flex-direction: row;
+    }
     .question-row {
         flex-direction: column;
         align-items: stretch;
+        gap: 1rem;
     }
     .drop-zone {
         width: 100%;

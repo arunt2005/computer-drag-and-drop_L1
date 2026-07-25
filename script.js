@@ -1,7 +1,6 @@
 // --- Quiz Configuration Data ---
-// Easily update, remove, or append data fields here!
 const quizData = [
-    {
+  {
     "athlete": "scanner",
     "question": "A device that is used for converting printed documents or photos into electronic formats is called a _______________."
   },
@@ -26,6 +25,7 @@ const quizData = [
     "question": "A _______________ is used to capture images and store them in a digital format."
   }
 ];
+
 document.addEventListener('DOMContentLoaded', () => {
     const helpBox = document.getElementById('helpBox');
     const questionsContainer = document.getElementById('questionsContainer');
@@ -33,9 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Dynamic Component Generation ---
     function initializeQuiz() {
-        // 1. Generate & mix up/shuffle Help Box Choices to prevent direct sequence matching
         const athletes = quizData.map(item => item.athlete);
-        // Optional array shuffle formula
         athletes.sort(() => Math.random() - 0.5);
 
         athletes.forEach(name => {
@@ -47,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
             helpBox.appendChild(node);
         });
 
-        // 2. Generate Question Row Layouts
         quizData.forEach(item => {
             const row = document.createElement('div');
             row.className = 'question-row';
@@ -65,15 +62,33 @@ document.addEventListener('DOMContentLoaded', () => {
             questionsContainer.appendChild(row);
         });
 
-        // Attach event listeners after content instantiation
         setupDragAndDrop();
     }
 
-    // --- Drag and Drop Bindings ---
+    // --- Helper function to place dragged item into drop target ---
+    function placeItemInZone(item, targetZone) {
+        if (!item || !targetZone) return;
+
+        if (targetZone === helpBox) {
+            helpBox.appendChild(item);
+            return;
+        }
+
+        if (targetZone.classList.contains('drop-zone')) {
+            // Swap rules: Send existing element home if drop target is filled
+            if (targetZone.children.length > 0 && targetZone.children[0] !== item) {
+                helpBox.appendChild(targetZone.children[0]);
+            }
+            targetZone.appendChild(item);
+        }
+    }
+
+    // --- Drag & Drop + Touch Support Bindings ---
     function setupDragAndDrop() {
         const draggables = document.querySelectorAll('.draggable-item');
         const dropZones = document.querySelectorAll('.drop-zone');
 
+        // ---------------- Desktop Mouse Events ----------------
         draggables.forEach(draggable => {
             draggable.addEventListener('dragstart', () => draggable.classList.add('dragging'));
             draggable.addEventListener('dragend', () => draggable.classList.remove('dragging'));
@@ -90,24 +105,95 @@ document.addEventListener('DOMContentLoaded', () => {
             zone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 zone.classList.remove('drop-zone--over');
-                
                 const draggedItem = document.querySelector('.dragging');
-                if (!draggedItem) return;
-                
-                // Swap rules: Send existing element home if drop target is filled
-                if (zone.children.length > 0) {
-                    helpBox.appendChild(zone.children[0]);
-                }
-                zone.appendChild(draggedItem);
+                placeItemInZone(draggedItem, zone);
             });
         });
 
-        // Enable moving items backwards into the help box
         helpBox.addEventListener('dragover', (e) => e.preventDefault());
         helpBox.addEventListener('drop', (e) => {
             e.preventDefault();
             const draggedItem = document.querySelector('.dragging');
             if (draggedItem) helpBox.appendChild(draggedItem);
+        });
+
+        // ---------------- Mobile Touch Events ----------------
+        let touchDraggedItem = null;
+        let touchGhost = null;
+        let initialX = 0, initialY = 0;
+
+        draggables.forEach(item => {
+            item.addEventListener('touchstart', (e) => {
+                touchDraggedItem = item;
+                const touch = e.touches[0];
+                initialX = touch.clientX;
+                initialY = touch.clientY;
+
+                // Create a floating visual clone during drag
+                touchGhost = item.cloneNode(true);
+                touchGhost.classList.add('touch-ghost');
+                
+                // Set initial position
+                const rect = item.getBoundingClientRect();
+                touchGhost.style.width = `${rect.width}px`;
+                touchGhost.style.left = `${rect.left}px`;
+                touchGhost.style.top = `${rect.top}px`;
+                
+                document.body.appendChild(touchGhost);
+                item.classList.add('dragging');
+            }, { passive: false });
+
+            item.addEventListener('touchmove', (e) => {
+                if (!touchGhost) return;
+                e.preventDefault(); // Prevent page scrolling while dragging an answer
+
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - initialX;
+                const deltaY = touch.clientY - initialY;
+
+                const rect = item.getBoundingClientRect();
+                touchGhost.style.left = `${rect.left + deltaX}px`;
+                touchGhost.style.top = `${rect.top + deltaY}px`;
+
+                // Highlight dropzone under finger
+                touchGhost.style.visibility = 'hidden'; // Temporarily hide to get underlying element
+                const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                touchGhost.style.visibility = 'visible';
+
+                document.querySelectorAll('.drop-zone, .help-box').forEach(z => z.classList.remove('drop-zone--over'));
+                if (elemBelow) {
+                    const zone = elemBelow.closest('.drop-zone, .help-box');
+                    if (zone) zone.classList.add('drop-zone--over');
+                }
+            }, { passive: false });
+
+            item.addEventListener('touchend', (e) => {
+                if (!touchGhost) return;
+
+                const touch = e.changedTouches[0];
+                touchGhost.style.visibility = 'hidden';
+                const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                
+                if (touchGhost.parentNode) {
+                    touchGhost.parentNode.removeChild(touchGhost);
+                }
+                touchGhost = null;
+
+                item.classList.remove('dragging');
+                document.querySelectorAll('.drop-zone, .help-box').forEach(z => z.classList.remove('drop-zone--over'));
+
+                if (elemBelow) {
+                    const dropZone = elemBelow.closest('.drop-zone');
+                    const helpBoxZone = elemBelow.closest('.help-box, .help-box-panel');
+
+                    if (dropZone) {
+                        placeItemInZone(item, dropZone);
+                    } else if (helpBoxZone) {
+                        placeItemInZone(item, helpBox);
+                    }
+                }
+                touchDraggedItem = null;
+            });
         });
     }
 
@@ -137,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Rendering score outcomes
         const resultBox = document.getElementById('resultBox');
         resultBox.style.display = 'block';
         resultBox.textContent = `You scored ${score} out of ${total}!`;
@@ -153,6 +238,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Fire off initialize sequence
     initializeQuiz();
 });
